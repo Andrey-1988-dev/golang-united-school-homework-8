@@ -67,26 +67,11 @@ func add(args Arguments, writer io.Writer) error {
 		return errors.New("-item flag has to be specified")
 	}
 
-	//////////////////////////////////////
-	jsonFile, err := os.OpenFile(args["fileName"], os.O_CREATE|os.O_RDWR, 0644)
+	_, jsonFile, users, err := getUsers(args["fileName"])
 	if err != nil {
 		return err
 	}
 	defer jsonFile.Close()
-
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return err
-	}
-
-	var users []User
-	if len(byteValue) > 0 {
-		err = json.Unmarshal(byteValue, &users)
-		if err != nil {
-			return err
-		}
-	}
-	//////////////////////////////////////
 
 	var item User
 	err = json.Unmarshal([]byte(args["item"]), &item)
@@ -133,33 +118,16 @@ func remove(args Arguments, writer io.Writer) error {
 		return errors.New("-id flag has to be specified")
 	}
 
-	//////////////////////////////////////
-	jsonFile, err := os.OpenFile(args["fileName"], os.O_CREATE|os.O_RDWR, 0644)
+	_, jsonFile, users, err := getUsers(args["fileName"])
 	if err != nil {
 		return err
 	}
 	defer jsonFile.Close()
 
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return err
-	}
-
-	var users []User
-	if len(byteValue) > 0 {
-		err = json.Unmarshal(byteValue, &users)
-		if err != nil {
-			return err
-		}
-	}
-	//////////////////////////////////////
-	fmt.Println(args["id"])
 	// If user exists, then json object should be written in `io.Writer`
 	for key, value := range users {
-		fmt.Println(value.Id)
 		if value.Id == args["id"] {
 			users = append(users[:key], users[key+1:]...)
-			fmt.Println(users)
 
 			jsonUsers, err := json.Marshal(users)
 			if err != nil {
@@ -198,26 +166,11 @@ func findById(args Arguments, writer io.Writer) error {
 		return errors.New("-id flag has to be specified")
 	}
 
-	//////////////////////////////////////
-	jsonFile, err := os.OpenFile(args["fileName"], os.O_CREATE|os.O_RDWR, 0644)
+	_, jsonFile, users, err := getUsers(args["fileName"])
 	if err != nil {
 		return err
 	}
 	defer jsonFile.Close()
-
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return err
-	}
-
-	var users []User
-	if len(byteValue) > 0 {
-		err = json.Unmarshal(byteValue, &users)
-		if err != nil {
-			return err
-		}
-	}
-	//////////////////////////////////////
 
 	// If user exists, then json object should be written in `io.Writer`
 	for _, value := range users {
@@ -244,31 +197,36 @@ func findById(args Arguments, writer io.Writer) error {
 }
 
 func list(args Arguments, writer io.Writer) error {
-	//////////////////////////////////////
-	jsonFile, err := os.OpenFile(args["fileName"], os.O_CREATE|os.O_RDWR, 0644)
+	byteValue, jsonFile, _, err := getUsers(args["fileName"])
 	if err != nil {
 		return err
 	}
 	defer jsonFile.Close()
-
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return err
-	}
-	/*
-		var users []User
-		if len(byteValue) > 0 {
-			err = json.Unmarshal(byteValue, &users)
-			if err != nil {
-				return err
-			}
-		}
-	*/
-	//////////////////////////////////////
 
 	_, err = writer.Write(byteValue)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func getUsers(fileName string) ([]byte, *os.File, []User, error) {
+	jsonFile, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		return nil, nil, nil, nil
+	}
+
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		return nil, nil, nil, nil
+	}
+
+	var users []User
+	if len(byteValue) > 0 {
+		err = json.Unmarshal(byteValue, &users)
+		if err != nil {
+			return nil, nil, nil, nil
+		}
+	}
+	return byteValue, jsonFile, users, err
 }
