@@ -80,9 +80,11 @@ func add(args Arguments, writer io.Writer) error {
 	}
 
 	var users []User
-	err = json.Unmarshal(byteValue, &users)
-	if err != nil {
-		return err
+	if len(byteValue) > 0 {
+		err = json.Unmarshal(byteValue, &users)
+		if err != nil {
+			return err
+		}
 	}
 	//////////////////////////////////////
 
@@ -91,9 +93,7 @@ func add(args Arguments, writer io.Writer) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(item.Id)
 	for _, value := range users {
-		fmt.Println(value.Id)
 		if value.Id == item.Id {
 			errMessage := fmt.Sprintf("Item with id %s already exists", item.Id)
 			_, err = writer.Write([]byte(errMessage))
@@ -146,14 +146,17 @@ func remove(args Arguments, writer io.Writer) error {
 	}
 
 	var users []User
-	err = json.Unmarshal(byteValue, &users)
-	if err != nil {
-		return err
+	if len(byteValue) > 0 {
+		err = json.Unmarshal(byteValue, &users)
+		if err != nil {
+			return err
+		}
 	}
 	//////////////////////////////////////
 
 	// If user exists, then json object should be written in `io.Writer`
 	for key, value := range users {
+		fmt.Println(value.Id)
 		if value.Id == args["id"] {
 			users = append(users[:key], users[key+1:]...)
 			jsonUsers, err := json.Marshal(value)
@@ -168,8 +171,12 @@ func remove(args Arguments, writer io.Writer) error {
 		}
 	}
 
-	// If user with id `"2"`, for example, does not exist, Perform functions should print message to the `io.Writer` «Item with id 2 not found».
-	return fmt.Errorf("item with id '%s' not found", args["id"])
+	errMessage := fmt.Sprintf("Item with id %s not found", args["id"])
+	_, err = writer.Write([]byte(errMessage))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func findById(args Arguments, writer io.Writer) error {
@@ -190,9 +197,11 @@ func findById(args Arguments, writer io.Writer) error {
 	}
 
 	var users []User
-	err = json.Unmarshal(byteValue, &users)
-	if err != nil {
-		return err
+	if len(byteValue) > 0 {
+		err = json.Unmarshal(byteValue, &users)
+		if err != nil {
+			return err
+		}
 	}
 	//////////////////////////////////////
 
@@ -234,9 +243,11 @@ func list(args Arguments, writer io.Writer) error {
 	}
 	/*
 		var users []User
-		err = json.Unmarshal(byteValue, &users)
-		if err != nil {
-			return err
+		if len(byteValue) > 0 {
+			err = json.Unmarshal(byteValue, &users)
+			if err != nil {
+				return err
+			}
 		}
 	*/
 	//////////////////////////////////////
