@@ -18,6 +18,27 @@ type User struct {
 	Age   int    `json:"age"`
 }
 
+func main() {
+	err := Perform(parseArgs(), os.Stdout)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func parseArgs() Arguments {
+	id := flag.String("id", "", "")
+	operation := flag.String("operation", "", "")
+	item := flag.String("item", "", "")
+	fileName := flag.String("fileName", "", "")
+	flag.Parse()
+	return Arguments{
+		"id":        *id,
+		"operation": *operation,
+		"item":      *item,
+		"fileName":  *fileName,
+	}
+}
+
 func Perform(args Arguments, writer io.Writer) error {
 	if args["operation"] == "" {
 		return errors.New("-operation flag has to be specified")
@@ -38,27 +59,6 @@ func Perform(args Arguments, writer io.Writer) error {
 		return remove(args, writer)
 	default:
 		return fmt.Errorf("Operation %s not allowed!", args["operation"])
-	}
-}
-
-func main() {
-	err := Perform(parseArgs(), os.Stdout)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func parseArgs() Arguments {
-	id := flag.String("id", "", "")
-	operation := flag.String("operation", "", "")
-	item := flag.String("item", "", "")
-	fileName := flag.String("fileName", "", "")
-	flag.Parse()
-	return Arguments{
-		"id":        *id,
-		"operation": *operation,
-		"item":      *item,
-		"fileName":  *fileName,
 	}
 }
 
