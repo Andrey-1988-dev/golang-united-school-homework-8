@@ -153,20 +153,34 @@ func remove(args Arguments, writer io.Writer) error {
 		}
 	}
 	//////////////////////////////////////
-
+	fmt.Println(args["id"])
 	// If user exists, then json object should be written in `io.Writer`
 	for key, value := range users {
 		fmt.Println(value.Id)
 		if value.Id == args["id"] {
 			users = append(users[:key], users[key+1:]...)
-			jsonUsers, err := json.Marshal(value)
+			fmt.Println(users)
+
+			jsonUsers, err := json.Marshal(users)
 			if err != nil {
 				return err
 			}
-			_, err = writer.Write(jsonUsers)
+
+			err = jsonFile.Truncate(0)
 			if err != nil {
 				return err
 			}
+
+			_, err = jsonFile.Seek(0, 0)
+			if err != nil {
+				return err
+			}
+
+			_, err = jsonFile.Write(jsonUsers)
+			if err != nil {
+				return err
+			}
+
 			return nil
 		}
 	}
